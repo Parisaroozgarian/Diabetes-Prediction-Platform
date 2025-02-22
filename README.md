@@ -1,6 +1,6 @@
 # Diabetes Prediction Platform 🏥
 
-[![MIT License](https://github.com/Parisaroozgarian/Diabetes-Prediction-Models/blob/main/LICENSE)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Parisaroozgarian/Diabetes-Prediction-Models/blob/main/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-orange.svg)](https://flask.palletsprojects.com/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0+-red.svg)](https://scikit-learn.org/)
