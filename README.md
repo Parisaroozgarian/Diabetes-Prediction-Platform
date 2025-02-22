@@ -241,7 +241,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Parisa Roozgarian**
 - LinkedIn: [Parisa Roozgarian](https://linkedin.com/in/parisa-roozgarian)
-- GitHub: [@parisa-roozgarian](https://github.com/parisa-roozgarian)
+- GitHub: [@parisa-roozgarian](https://github.com/Parisaroozgarian)
 - Portfolio: [www.parisaroozgarian.com](https://parisarzg.replit.app)
 
 ## 🙏 Acknowledgments
