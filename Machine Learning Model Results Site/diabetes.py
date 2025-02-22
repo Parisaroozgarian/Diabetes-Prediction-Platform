@@ -3,27 +3,42 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn import svm
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
+import numpy as np
+import os
 
 app = Flask(__name__)
 
-# Load the dataset
-def load_data():
-    data = pd.read_csv('/Users/macbook12/Desktop/diabetes/diabetes.csv')
-    x = data[['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age']]
-    y = data['Outcome']
-    return train_test_split(x, y, test_size=0.2, random_state=0)
-
-# Evaluate model
-def evaluate_model(clf, x_train, x_test, y_train, y_test):
-    clf.fit(x_train, y_train)
-    y_pred = clf.predict(x_test)
-    return {
-        'f1_score': f1_score(y_test, y_pred, average='weighted'),
-        'accuracy': accuracy_score(y_test, y_pred)
-    }
+def load_and_preprocess_data():
+    """Load and preprocess the dataset"""
+    try:
+        # Use relative path from the current script location
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        data_path = os.path.join(current_dir, 'diabetes.csv')
+        
+        data = pd.read_csv(data_path)
+        
+        # Handle missing values (0 values in certain columns)
+        columns_to_fix = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+        for column in columns_to_fix:
+            data[column] = data[column].replace(0, data[column][data[column] != 0].mean())
+        
+        # Features and target
+        x = data[['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 
+                 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age']]
+        y = data['Outcome']
+        
+        # Feature scaling
+        scaler = StandardScaler()
+        x_scaled = scaler.fit_transform(x)
+        
+        return train_test_split(x_scaled, y, test_size=0.2, random_state=42)
+    except Exception as e:
+        print(f"Error in data loading: {str(e)}")
+        return None, None, None, None
 
 @app.route('/')
 def index():
@@ -31,34 +46,74 @@ def index():
 
 @app.route('/run-model', methods=['POST'])
 def run_model():
-    x_train, x_test, y_train, y_test = load_data()
-    data = request.get_json()
-    
-    model_type = data.get('model_type')
-    params = data.get('params', {})
+    try:
+        # Load and preprocess data
+        x_train, x_test, y_train, y_test = load_and_preprocess_data()
+        if x_train is None:
+            return jsonify({'error': 'Failed to load data. Please ensure diabetes.csv is in the correct location.'}), 500
 
-    if model_type == 'decision_tree':
-        max_depth = params.get('max_depth', None)
-        dt = DecisionTreeClassifier(max_depth=int(max_depth) if max_depth else None)
-        result = evaluate_model(dt, x_train, x_test, y_train, y_test)
+        data = request.get_json()
+        model_type = data.get('model_type')
+        params = data.get('params', {})
 
-    elif model_type == 'knn':
-        n_neighbors = params.get('n_neighbors', 5)
-        knn = KNeighborsClassifier(n_neighbors=int(n_neighbors))
-        result = evaluate_model(knn, x_train, x_test, y_train, y_test)
+        # Initialize model based on type
+        if model_type == 'decision_tree':
+            max_depth = int(params.get('max_depth')) if params.get('max_depth') else None
+            min_samples_split = int(params.get('min_samples_split', 2))
+            clf = DecisionTreeClassifier(
+                max_depth=max_depth,
+                min_samples_split=min_samples_split,
+                random_state=42
+            )
 
-    elif model_type == 'logistic_regression':
-        lr = LogisticRegression(max_iter=1000)
-        result = evaluate_model(lr, x_train, x_test, y_train, y_test)
+        elif model_type == 'knn':
+            n_neighbors = int(params.get('n_neighbors', 5))
+            weights = params.get('weights', 'uniform')
+            clf = KNeighborsClassifier(
+                n_neighbors=n_neighbors,
+                weights=weights
+            )
 
-    elif model_type == 'svm':
-        svm_model = svm.SVC(kernel='linear')
-        result = evaluate_model(svm_model, x_train, x_test, y_train, y_test)
+        elif model_type == 'logistic_regression':
+            C = float(params.get('C', 1.0))
+            clf = LogisticRegression(
+                C=C,
+                max_iter=1000,
+                random_state=42
+            )
 
-    else:
-        return jsonify({'error': 'Invalid model type'}), 400
+        elif model_type == 'svm':
+            C = float(params.get('C', 1.0))
+            kernel = params.get('kernel', 'rbf')
+            clf = svm.SVC(
+                C=C,
+                kernel=kernel,
+                random_state=42
+            )
 
-    return jsonify(result)
+        else:
+            return jsonify({'error': 'Invalid model type'}), 400
+
+        # Train and evaluate model
+        clf.fit(x_train, y_train)
+        y_pred = clf.predict(x_test)
+        
+        # Calculate metrics
+        metrics = {
+            'accuracy': float(accuracy_score(y_test, y_pred)),
+            'f1_score': float(f1_score(y_test, y_pred)),
+            'precision': float(precision_score(y_test, y_pred)),
+            'recall': float(recall_score(y_test, y_pred))
+        }
+        
+        # Add cross-validation score
+        cv_scores = cross_val_score(clf, x_train, y_train, cv=5)
+        metrics['cv_score'] = float(cv_scores.mean())
+        
+        return jsonify(metrics)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

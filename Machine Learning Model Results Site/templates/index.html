@@ -3,162 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Learning Model Results</title>
+    <meta name="description" content="Machine Learning Model Evaluation Dashboard">
+    <title>Dia Predict - Model Evaluation Dashboard</title>
+    
+    <!-- Preload critical assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Stylesheets -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <div class="content-wrapper">
-        <!-- Header with Logo and Menu -->
-        <header>
-            <div class="header-content">
-                <!-- Logo Section -->
-                <div class="logo">
-                    <img src="{{ url_for('static', filename='images/machine-learning.png') }}" alt="ML Insights Logo">
-                </div>
-                <!-- Navigation Bar -->
-                <nav class="navbar">
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#model-results">Model Results</a></li>
-                        <li><a href="#input-form">Run Models</a></li>
-                        <li><a href="#contact">Contact</a></li>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
+
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg fixed-top" role="navigation">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#" aria-label="ML Insights Home">
+                    <img src="{{ url_for('static', filename='images/mlinsightlogo.png') }}" 
+                        alt="ML Insights Logo" width="40" height="40" class="me-2">
+                    <span>DIA PREDICT</span>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#home">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#model-results">Results</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#input-form">Models</a>
+                        </li>
                     </ul>
-                </nav>
+                </div>
             </div>
-            <div class="hero" id="home">
-                <h1>Welcome to Machine Learning Insights</h1>
-                <p>We provide cutting-edge machine learning model evaluation and results.</p>
-                <a href="#model-results" class="cta-btn">Explore Models</a>
-            </div>
-        </header>
+        </nav>
 
-        <main>
-            <!-- Model Selection Form -->
-            <section id="input-form" class="section">
-                <h2>Select Parameters</h2>
-                <form id="model-form" class="form-container">
-                    <!-- Decision Tree Option -->
-                    <div class="form-group">
-                        <label class="radio-label">
-                            <input type="radio" name="model" value="decision_tree" checked> 
-                            Decision Tree
-                        </label>
-                        <label for="tree-max-depth" class="input-label">Max Depth (optional):</label>
-                        <input type="number" id="tree-max-depth" name="max_depth" class="input-field" placeholder="Enter max depth">
-                    </div>
-                
-                    <!-- K-Nearest Neighbors Option -->
-                    <div class="form-group">
-                        <label class="radio-label">
-                            <input type="radio" name="model" value="knn"> 
-                            K-Nearest Neighbors (KNN)
-                        </label>
-                        <label for="knn-n-neighbors" class="input-label">n_neighbors (optional):</label>
-                        <input type="number" id="knn-n-neighbors" name="n_neighbors" class="input-field" placeholder="Enter neighbors count">
-                    </div>
-                
-                    <!-- Logistic Regression Option -->
-                    <div class="form-group">
-                        <label class="radio-label">
-                            <input type="radio" name="model" value="logistic_regression"> 
-                            Logistic Regression
-                        </label>
-                    </div>
-                
-                    <!-- Support Vector Machine Option -->
-                    <div class="form-group">
-                        <label class="radio-label">
-                            <input type="radio" name="model" value="svm"> 
-                            Support Vector Machine (SVM)
-                        </label>
-                    </div>
-                </form>
-                
-                
-            </section>
-
-            <!-- Model Results Section -->
-            <section id="model-results" class="section model-section">
-                <h2>Model Evaluation Results</h2>
-                <div class="results-grid" id="results-section">
-                    <!-- Decision Tree -->
-                    <div class="result-card hidden" id="decision-tree-card">
-                        <div class="icon">
-                            <img src="{{ url_for('static', filename='images/decision tree.png') }}" alt="Decision Tree Icon">
-                        </div>
-                        <h3>Decision Tree</h3>
-                        <p id="decision-tree-results">
-                            F1 Score: 0.00<br>
-                            Accuracy: 0.00
-                        </p>
-                    </div>
-                
-                    <!-- K-Nearest Neighbors -->
-                    <div class="result-card hidden" id="knn-card">
-                        <div class="icon">
-                            <img src="{{ url_for('static', filename='images/KNN.png') }}" alt="KNN Icon">
-                        </div>
-                        <h3>K-Nearest Neighbors (KNN)</h3>
-                        <p id="knn-results">
-                            F1 Score: 0.00<br>
-                            Accuracy: 0.00
-                        </p>
-                    </div>
-                
-                    <!-- Logistic Regression -->
-                    <div class="result-card hidden" id="logistic-regression-card">
-                        <div class="icon">
-                            <img src="{{ url_for('static', filename='images/logisticregression.png') }}" alt="Logistic Regression Icon">
-                        </div>
-                        <h3>Logistic Regression</h3>
-                        <p id="logistic-regression-results">
-                            F1 Score: 0.00<br>
-                            Accuracy: 0.00
-                        </p>
-                    </div>
-                
-                    <!-- Support Vector Machine -->
-                    <div class="result-card hidden" id="svm-card">
-                        <div class="icon">
-                            <img src="{{ url_for('static', filename='images/svm.png') }}" alt="SVM Icon">
-                        </div>
-                        <h3>Support Vector Machine (SVM)</h3>
-                        <p id="svm-results">
-                            F1 Score: 0.00<br>
-                            Accuracy: 0.00
-                        </p>
+        <!-- Updated Hero Section HTML -->
+        <section id="home" class="hero" style="background-image: url('{{ url_for('static', filename='images/DiabetesMachineLearning.png') }}');">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-7 col-md-8 col-sm-12">
+                        <h1 class="display-4 fw-bold mb-4">Diabetes Prediction Models</h1>
+                        <p class="lead mb-4">Predict diabetes outcomes using SVM, KNN, Logistic Regression, and Decision Tree models. Measure performance with F1 score, Precision, Recall, and Accuracy and discover powerful insights for better healthcare decisions.</p>
+                        <a href="#input-form" class="btn btn-light btn-lg">
+                            Get Started
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
                     </div>
                 </div>
-
-                <div class="cta-btn-container">
-                    <button id="run-models" class="cta-btn">Run Models</button>
-                </div>
-            </section>
-        </main>
-
-        <!-- Contact Section -->
-        <section id="contact" class="contact-section section">
-            <h2>Contact Us</h2>
-            <p>If you have any inquiries or feedback, feel free to get in touch.</p>
-            <form action="/submit-form" method="post">
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" placeholder="Your name" required>
-
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="Your email" required>
-
-                <label for="message">Message</label>
-                <textarea id="message" name="message" rows="5" placeholder="Your message" required></textarea>
-
-                <button type="submit" class="submit-btn">Send Message</button>
-            </form>
+            </div>
         </section>
 
-        <footer>
-            <p>&copy; 2024 ML Insights. All rights reserved.</p>
-        </footer>
-    </div>
+        <!-- Model Selection Section -->
+        <section id="input-form" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-4">Configure Your Model</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-body p-4">
+                                <form id="model-form">
+                                    <!-- Decision Tree -->
+                                    <div class="model-option">
+                                        <div class="form-check d-flex align-items-center gap-2">
+                                            <input class="form-check-input" type="radio" name="model" 
+                                                   value="decision_tree" id="decisionTree" checked>
+                                            <label class="form-check-label fw-bold" for="decisionTree">
+                                                Decision Tree
+                                            </label>
+                                        </div>
+                                        <div id="decision-tree-params" class="params-container">
+                                            <div class="mb-3">
+                                                <label for="tree-max-depth" class="form-label">
+                                                    Max Depth
+                                                    <small class="text-muted">(Optional)</small>
+                                                </label>
+                                                <input type="number" class="form-control" id="tree-max-depth" 
+                                                       min="1" placeholder="Leave empty for unlimited depth"
+                                                       aria-describedby="maxDepthHelp">
+                                                <div id="maxDepthHelp" class="form-text">
+                                                    Maximum depth of the decision tree
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="tree-min-samples-split" class="form-label">
+                                                    Min Samples Split
+                                                    <small class="text-muted">(Optional)</small>
+                                                </label>
+                                                <input type="number" class="form-control" id="tree-min-samples-split" 
+                                                       min="2" placeholder="Default: 2"
+                                                       aria-describedby="minSamplesSplitHelp">
+                                                <div id="minSamplesSplitHelp" class="form-text">
+                                                    Minimum samples required to split a node
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <!-- KNN -->
+                                    <div class="model-option">
+                                        <div class="form-check d-flex align-items-center gap-2">
+                                            <input class="form-check-input" type="radio" name="model" 
+                                                   value="knn" id="knn">
+                                            <label class="form-check-label fw-bold" for="knn">
+                                                K-Nearest Neighbors (KNN)
+                                            </label>
+                                        </div>
+                                        <div id="knn-params" class="params-container" style="display: none;">
+                                            <div class="mb-3">
+                                                <label for="knn-n-neighbors" class="form-label">
+                                                    Number of Neighbors
+                                                    <small class="text-muted">(Optional)</small>
+                                                </label>
+                                                <input type="number" class="form-control" id="knn-n-neighbors" 
+                                                       min="1" placeholder="Default: 5"
+                                                       aria-describedby="nNeighborsHelp">
+                                                <div id="nNeighborsHelp" class="form-text">
+                                                    Number of neighbors to consider
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="knn-weights" class="form-label">Weights</label>
+                                                <select class="form-select" id="knn-weights" 
+                                                        aria-describedby="weightsHelp">
+                                                    <option value="uniform">Uniform</option>
+                                                    <option value="distance">Distance</option>
+                                                </select>
+                                                <div id="weightsHelp" class="form-text">
+                                                    Weight function used in prediction
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Logistic Regression -->
+                                    <div class="model-option">
+                                        <div class="form-check d-flex align-items-center gap-2">
+                                            <input class="form-check-input" type="radio" name="model" 
+                                                   value="logistic_regression" id="logisticRegression">
+                                            <label class="form-check-label fw-bold" for="logisticRegression">
+                                                Logistic Regression
+                                            </label>
+                                        </div>
+                                        <div id="logistic-regression-params" class="params-container" style="display: none;">
+                                            <div class="mb-3">
+                                                <label for="lr-c" class="form-label">
+                                                    Regularization (C)
+                                                    <small class="text-muted">(Optional)</small>
+                                                </label>
+                                                <input type="number" class="form-control" id="lr-c" 
+                                                       min="0.1" step="0.1" placeholder="Default: 1.0"
+                                                       aria-describedby="lrCHelp">
+                                                <div id="lrCHelp" class="form-text">
+                                                    Inverse of regularization strength
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SVM -->
+                                    <div class="model-option">
+                                        <div class="form-check d-flex align-items-center gap-2">
+                                            <input class="form-check-input" type="radio" name="model" 
+                                                   value="svm" id="svm">
+                                            <label class="form-check-label fw-bold" for="svm">
+                                                Support Vector Machine (SVM)
+                                            </label>
+                                        </div>
+                                        <div id="svm-params" class="params-container" style="display: none;">
+                                            <div class="mb-3">
+                                                <label for="svm-c" class="form-label">
+                                                    Regularization (C)
+                                                    <small class="text-muted">(Optional)</small>
+                                                </label>
+                                                <input type="number" class="form-control" id="svm-c" 
+                                                       min="0.1" step="0.1" placeholder="Default: 1.0"
+                                                       aria-describedby="svmCHelp">
+                                                <div id="svmCHelp" class="form-text">
+                                                    Regularization parameter
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="svm-kernel" class="form-label">Kernel</label>
+                                                <select class="form-select" id="svm-kernel" 
+                                                        aria-describedby="kernelHelp">
+                                                    <option value="rbf">RBF</option>
+                                                    <option value="linear">Linear</option>
+                                                    <option value="poly">Polynomial</option>
+                                                    <option value="sigmoid">Sigmoid</option>
+                                                </select>
+                                                <div id="kernelHelp" class="form-text">
+                                                    Kernel type to be used in the algorithm
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                                <div class="text-center mt-4">
+                                    <button id="run-models" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-play me-2"></i>Run Model
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="model-results" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-4">Model Evaluation Results</h2>
+                <div class="row g-4">
+                    <!-- Decision Tree Results -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="result-card" id="decision-tree-card">
+                            <div class="card-body">
+                                <div class="model-icon-container">
+                                    <img src="{{ url_for('static', filename='images/decision tree.png') }}" 
+                                         alt="" class="model-icon" width="60" height="60">
+                                </div>
+                                <h3 class="h5 text-center mb-3">Decision Tree</h3>
+                                <div id="decision-tree-results" class="metrics-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KNN Results -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="result-card" id="knn-card">
+                            <div class="card-body">
+                                <div class="model-icon-container">
+                                    <img src="{{ url_for('static', filename='images/KNN.png') }}" 
+                                         alt="" class="model-icon" width="60" height="60">
+                                </div>
+                                <h3 class="h5 text-center mb-3">K-Nearest Neighbors</h3>
+                                <div id="knn-results" class="metrics-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logistic Regression Results -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="result-card" id="logistic-regression-card">
+                            <div class="card-body">
+                                <div class="model-icon-container">
+                                    <img src="{{ url_for('static', filename='images/logisticregression.png') }}" 
+                                         alt="" class="model-icon" width="60" height="60">
+                                </div>
+                                <h3 class="h5 text-center mb-3">Logistic Regression</h3>
+                                <div id="logistic-regression-results" class="metrics-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SVM Results -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="result-card" id="svm-card">
+                            <div class="card-body">
+                                <div class="model-icon-container">
+                                    <img src="{{ url_for('static', filename='images/svm.png') }}" 
+                                         alt="" class="model-icon" width="60" height="60">
+                                </div>
+                                <h3 class="h5 text-center mb-3">Support Vector Machine</h3>
+                                <div id="svm-results" class="metrics-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark text-white mt-auto">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0">&copy; 2025 DIA PREDICT. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0">
+                        <a href="#" class="text-white text-decoration-none">Privacy Policy</a>
+                        <span class="mx-2">|</span>
+                        <a href="#" class="text-white text-decoration-none">Terms of Service</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
