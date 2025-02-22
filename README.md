@@ -1,6 +1,6 @@
 # Diabetes Prediction Platform 🏥
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![MIT License](https://github.com/Parisaroozgarian/Diabetes-Prediction-Models/blob/main/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-orange.svg)](https://flask.palletsprojects.com/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0+-red.svg)](https://scikit-learn.org/)
@@ -10,7 +10,8 @@
 
 A comprehensive machine learning web application for diabetes prediction, featuring real-time model evaluation and interactive performance visualization. This platform combines modern ML techniques with an intuitive interface to help analyze diabetes risk factors and make predictions.
 
-![Platform Screenshot](Machine Learning Model Results Site/static/images/diabetes-prediction-models-website.png)
+<img width="1280" alt="diabetes-prediction-models-website" src="https://github.com/user-attachments/assets/fe85605c-7c8f-4e3a-b46a-7333d90fd17c" />
+
 
 ## ✨ Key Features
 
