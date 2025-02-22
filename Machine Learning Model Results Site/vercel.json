@@ -2,7 +2,8 @@
     "version": 2,
     "builds": [{
         "src": "diabetes.py",
-        "use": "@vercel/python"
+        "use": "@vercel/python",
+        "config": { "runtime": "python3.11" }
     }],
     "routes": [{
         "src": "/(.*)",
