@@ -1,5 +1,4 @@
 from flask import Flask, render_template, jsonify, request
-from flask_lambda import FlaskLambda
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
@@ -11,13 +10,11 @@ import pandas as pd
 import numpy as np
 import os
 
-# Use FlaskLambda for Vercel compatibility
-app = FlaskLambda(__name__)
+app = Flask(__name__)
 
 def load_and_preprocess_data():
     """Load and preprocess the dataset"""
     try:
-        # Use relative path to access diabetes.csv inside the 'static' folder
         current_dir = os.path.dirname(os.path.abspath(__file__))
         data_path = os.path.join(current_dir, 'static', 'diabetes.csv')
 
@@ -52,7 +49,6 @@ def index():
 @app.route('/run-model', methods=['POST'])
 def run_model():
     try:
-        # Load and preprocess data
         x_train, x_test, y_train, y_test = load_and_preprocess_data()
         if x_train is None:
             return jsonify({'error': 'Failed to load data. Ensure diabetes.csv is in the static/ folder.'}), 500
@@ -61,7 +57,6 @@ def run_model():
         model_type = data.get('model_type')
         params = data.get('params', {})
 
-        # Initialize model based on type
         if model_type == 'decision_tree':
             max_depth = int(params.get('max_depth')) if params.get('max_depth') else None
             min_samples_split = int(params.get('min_samples_split', 2))
@@ -99,11 +94,9 @@ def run_model():
         else:
             return jsonify({'error': 'Invalid model type'}), 400
 
-        # Train and evaluate model
         clf.fit(x_train, y_train)
         y_pred = clf.predict(x_test)
 
-        # Calculate metrics
         metrics = {
             'accuracy': float(accuracy_score(y_test, y_pred)),
             'f1_score': float(f1_score(y_test, y_pred)),
@@ -111,7 +104,6 @@ def run_model():
             'recall': float(recall_score(y_test, y_pred))
         }
 
-        # Add cross-validation score
         cv_scores = cross_val_score(clf, x_train, y_train, cv=5)
         metrics['cv_score'] = float(cv_scores.mean())
 
