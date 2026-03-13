@@ -9,18 +9,6 @@
 
 ---
 
-## 🌐 Live Demo
-> **[your-url.vercel.app](#)** ← replace after Vercel deployment
-
----
-
-## 📸 Screenshots
-
-### 🏠 Home
-<img width="1280" alt="DIA PREDICT Hero" src="https://github.com/user-attachments/assets/fe85605c-7c8f-4e3a-b46a-7333d90fd17c" />
-
-> 💡 **To add your own screenshots:** press `Cmd + Shift + 4` on Mac → drag the image into any GitHub Issue comment box → copy the auto-generated URL → paste it into the `src=""` below.
-
 ### 🎛️ Training Controls
 <!--
 <img width="1280" alt="Training Controls" src="YOUR_SCREENSHOT_URL" />
@@ -283,11 +271,6 @@ Returns the cached training results without retraining.
 npm i -g vercel
 vercel
 ```
-
-Vercel reads `vercel.json` and routes all traffic through `diabetes.py`.
-
-> ⚠️ **Serverless note:** Vercel functions are stateless — the in-memory `_cache` resets on cold starts. Always click **Train** before **Predict** in a fresh session. For persistent model storage, consider Railway.app instead.
-
 ---
 
 ## 📄 License
@@ -302,7 +285,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Parisaroozgarian-black?logo=github)](https://github.com/Parisaroozgarian)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-parisa--roozgarian-blue?logo=linkedin)](https://linkedin.com/in/parisa-roozgarian)
-[![Portfolio](https://img.shields.io/badge/Portfolio-parisarzg.replit.app-pink)](https://parisarzg.replit.app)
 
 ---
 
