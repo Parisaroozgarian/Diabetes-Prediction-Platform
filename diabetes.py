@@ -25,7 +25,7 @@ def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(current_dir, 'static', 'diabetes.csv')
     if not os.path.exists(data_path):
-        raise FileNotFoundError("diabetes.csv not found in static/")
+        data_path = os.path.join("/var/task", "static", "diabetes.csv")
 
     df = pd.read_csv(data_path)
 
@@ -108,7 +108,7 @@ def train_all_models(test_size=0.2, hyperparams=None, selected_features=None):
         sizes = np.linspace(0.1, 1.0, 7)
         lc_sizes, lc_train, lc_val = learning_curve(
             clf, X_train_s, y_train,
-            train_sizes=sizes, cv=5, scoring='accuracy', n_jobs=1
+            train_sizes=sizes, cv=5, scoring='accuracy', n_jobs=-1
         )
 
         results[name] = {
@@ -231,11 +231,6 @@ def api_results():
         'features': _cache['features'],
         'dataset':  _cache['dataset'],
     })
-
-
-# ─── Vercel handler ───────────────────────────────────────────────────────────
-def handler(event, context):
-    return app(event, context)
 
 
 if __name__ == '__main__':
