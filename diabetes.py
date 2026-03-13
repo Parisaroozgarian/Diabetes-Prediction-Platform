@@ -14,6 +14,16 @@ import numpy as np
 import os
 import json
 
+# ─── Vercel / serverless compatibility ───────────────────────────────────────
+import os
+os.environ['LOKY_MAX_CPU_COUNT'] = '1'
+# Force joblib to use threading instead of multiprocessing
+try:
+    from joblib import parallel_backend
+    _JOBLIB_BACKEND = 'threading'
+except Exception:
+    _JOBLIB_BACKEND = 'threading'
+
 app = Flask(__name__)
 
 # ─── In-memory model cache ────────────────────────────────────────────────────
@@ -25,7 +35,7 @@ def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(current_dir, 'static', 'diabetes.csv')
     if not os.path.exists(data_path):
-        data_path = os.path.join("/var/task", "static", "diabetes.csv")
+        raise FileNotFoundError("diabetes.csv not found in static/")
 
     df = pd.read_csv(data_path)
 
@@ -231,6 +241,11 @@ def api_results():
         'features': _cache['features'],
         'dataset':  _cache['dataset'],
     })
+
+
+# ─── Vercel handler ───────────────────────────────────────────────────────────
+def handler(event, context):
+    return app(event, context)
 
 
 if __name__ == '__main__':
