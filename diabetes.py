@@ -7,22 +7,15 @@ from sklearn.metrics import (
     accuracy_score, f1_score, precision_score, recall_score,
     roc_auc_score, confusion_matrix, classification_report, roc_curve
 )
-from sklearn.model_selection import train_test_split, learning_curve
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import numpy as np
 import os
 import json
 
-# ─── Vercel / serverless compatibility ───────────────────────────────────────
-import os
-os.environ['LOKY_MAX_CPU_COUNT'] = '1'
-# Force joblib to use threading instead of multiprocessing
-try:
-    from joblib import parallel_backend
-    _JOBLIB_BACKEND = 'threading'
-except Exception:
-    _JOBLIB_BACKEND = 'threading'
+os.environ["LOKY_MAX_CPU_COUNT"] = "1"
+os.environ["JOBLIB_MULTIPROCESSING"] = "0"
 
 app = Flask(__name__)
 
@@ -114,12 +107,22 @@ def train_all_models(test_size=0.2, hyperparams=None, selected_features=None):
             idx = np.linspace(0, n - 1, 60, dtype=int)
             fpr_arr, tpr_arr = fpr_arr[idx], tpr_arr[idx]
 
-        # Learning curve – 7 sizes, 5-fold CV
-        sizes = np.linspace(0.1, 1.0, 7)
-        lc_sizes, lc_train, lc_val = learning_curve(
-            clf, X_train_s, y_train,
-            train_sizes=sizes, cv=5, scoring='accuracy', n_jobs=-1
-        )
+        # Learning curve – manual loop, no joblib/multiprocessing
+        size_fracs = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 1.0]
+        lc_sizes_list, lc_train_list, lc_val_list = [], [], []
+        for frac in size_fracs:
+            n = max(20, int(frac * len(X_train_s)))
+            Xs, ys = X_train_s[:n], y_train[:n]
+            clf_tmp = clf.__class__(**clf.get_params())
+            clf_tmp.fit(Xs, ys)
+            tr_sc = float(accuracy_score(ys, clf_tmp.predict(Xs)))
+            val_sc = float(np.mean(cross_val_score(clf_tmp, Xs, ys, cv=3, scoring='accuracy', n_jobs=1)))
+            lc_sizes_list.append(n)
+            lc_train_list.append(tr_sc)
+            lc_val_list.append(val_sc)
+        lc_sizes = np.array(lc_sizes_list)
+        lc_train = np.array(lc_train_list).reshape(-1, 1)
+        lc_val   = np.array(lc_val_list).reshape(-1, 1)
 
         results[name] = {
             'train_acc': round(train_acc, 4),
