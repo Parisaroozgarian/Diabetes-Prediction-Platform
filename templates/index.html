@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIA PREDICT — ML Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="/static/images/mlinsightlogo.png" alt="" width="40" height="40" class="me-2" onerror="this.style.display='none'">
+      <span>DIA PREDICT</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sec-train">Train</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sec-results">Results</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sec-roc">ROC</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sec-predict">Predict</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home" class="hero" style="background-image:url('/static/images/DiabetesMachineLearning.png')">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-7 col-md-8">
+        <h1 class="display-4 fw-bold mb-4">Diabetes Prediction Models</h1>
+        <p class="lead mb-4">Train SVM, KNN, Logistic Regression and Decision Tree on real patient data. Evaluate with F1, Precision, Recall, AUC and predict individual patient risk.</p>
+        <a href="#sec-train" class="btn btn-light btn-lg">Get Started <i class="fas fa-arrow-right ms-2"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRAIN -->
+<section id="sec-train" class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Train All Models</h2>
+    <p class="section-sub text-center mb-5">One click trains SVM, KNN, Logistic Regression &amp; Decision Tree on 614 samples</p>
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-icon mx-auto mb-2" style="background:rgba(225,117,125,.12)"><i class="fas fa-users" style="color:#E1757D"></i></div><div class="stat-val">768</div><div class="stat-lbl">Patients</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-icon mx-auto mb-2" style="background:rgba(239,68,68,.1)"><i class="fas fa-exclamation-circle" style="color:#ef4444"></i></div><div class="stat-val">34.9%</div><div class="stat-lbl">Diabetic Rate</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-icon mx-auto mb-2" style="background:rgba(59,130,246,.1)"><i class="fas fa-check-square" style="color:#3b82f6"></i></div><div class="stat-val" id="c-acc">—</div><div class="stat-lbl">Best Accuracy</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card text-center"><div class="stat-icon mx-auto mb-2" style="background:rgba(34,197,94,.1)"><i class="fas fa-star" style="color:#22c55e"></i></div><div class="stat-val" id="c-auc">—</div><div class="stat-lbl">Best ROC-AUC</div></div></div>
+    </div>
+    <div class="text-center mb-5">
+
+      <!-- ── ADVANCED CONTROLS ── -->
+      <div class="row g-3 mb-4 text-start">
+
+        <!-- Train/Test Split -->
+        <div class="col-md-4">
+          <div class="chart-card h-100">
+            <div class="chart-label">Train / Test Split</div>
+            <div class="d-flex align-items-center gap-3 mt-2">
+              <input type="range" class="form-range flex-grow-1" id="splitSlider"
+                     min="60" max="90" step="5" value="80" oninput="onSplitChange(this.value)">
+              <span id="splitLabel" class="fw-bold" style="color:var(--primary-color);min-width:70px">80 / 20</span>
+            </div>
+            <div class="text-muted" style="font-size:.72rem;margin-top:6px">
+              Drag to change how much data trains vs. tests. Too little test data → unreliable scores.
+            </div>
+          </div>
+        </div>
+
+        <!-- Hyperparameters -->
+        <div class="col-md-4">
+          <div class="chart-card h-100">
+            <div class="chart-label">Hyperparameters</div>
+            <div class="mt-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-size:.78rem;font-weight:600">SVM C</span>
+                <span id="svmCLabel" class="fw-bold" style="color:var(--primary-color);font-size:.82rem">1.0</span>
+              </div>
+              <input type="range" class="form-range" id="svmC" min="0.1" max="10" step="0.1" value="1.0" oninput="document.getElementById('svmCLabel').textContent=parseFloat(this.value).toFixed(1)">
+              <div class="d-flex justify-content-between align-items-center mb-1 mt-2">
+                <span style="font-size:.78rem;font-weight:600">KNN k</span>
+                <span id="knnKLabel" class="fw-bold" style="color:var(--primary-color);font-size:.82rem">9</span>
+              </div>
+              <input type="range" class="form-range" id="knnK" min="1" max="21" step="2" value="9" oninput="document.getElementById('knnKLabel').textContent=this.value">
+              <div class="d-flex justify-content-between align-items-center mb-1 mt-2">
+                <span style="font-size:.78rem;font-weight:600">Tree Depth</span>
+                <span id="dtDepthLabel" class="fw-bold" style="color:var(--primary-color);font-size:.82rem">5</span>
+              </div>
+              <input type="range" class="form-range" id="dtDepth" min="2" max="15" step="1" value="5" oninput="document.getElementById('dtDepthLabel').textContent=this.value">
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature Selection -->
+        <div class="col-md-4">
+          <div class="chart-card h-100">
+            <div class="chart-label">Feature Selection <span class="text-muted fw-normal">(min 2)</span></div>
+            <div class="mt-2" id="featureToggles">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="trainBtn" class="btn btn-primary btn-lg px-5" onclick="trainModels()">
+        <i class="fas fa-play me-2"></i>Train All Models
+      </button>
+      <p class="mt-2 text-muted small" id="trainStatus">Models not trained yet</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="chart-card"><div class="chart-label">Class Balance</div><div style="height:180px;position:relative"><canvas id="donutChart"></canvas></div><div class="donut-legend mt-2"><span><span class="dot" style="background:#E1757D"></span>Diabetic 35%</span><span><span class="dot" style="background:#94a3b8"></span>Healthy 65%</span></div></div></div>
+      <div class="col-md-4"><div class="chart-card"><div class="chart-label">Glucose Distribution</div><div style="height:180px;position:relative"><canvas id="glucoseChart"></canvas></div></div></div>
+      <div class="col-md-4"><div class="chart-card"><div class="chart-label">BMI Distribution</div><div style="height:180px;position:relative"><canvas id="bmiChart"></canvas></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="sec-results" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Model Performance</h2>
+    <p class="section-sub text-center mb-5" id="modelSubtitle">Train models to see results</p>
+    <div class="row g-4 mb-5">
+      <div class="col-md-6 col-lg-3"><div class="result-card" id="mc-svm"><div class="card-body p-4"><div class="model-icon-container"><img src="/static/images/svm.png" alt="SVM" class="model-icon" onerror="this.style.display='none'"></div><h3 class="h5 text-center mb-1">SVM · RBF</h3><div class="model-acc text-center" id="ma-svm">—</div><div id="svm-metrics"></div><div class="verdict-chip idle mt-2" id="vc-svm">Awaiting patient…</div></div></div></div>
+      <div class="col-md-6 col-lg-3"><div class="result-card" id="mc-knn"><div class="card-body p-4"><div class="model-icon-container"><img src="/static/images/KNN.png" alt="KNN" class="model-icon" onerror="this.style.display='none'"></div><h3 class="h5 text-center mb-1">KNN · k=9</h3><div class="model-acc text-center" id="ma-knn">—</div><div id="knn-metrics"></div><div class="verdict-chip idle mt-2" id="vc-knn">Awaiting patient…</div></div></div></div>
+      <div class="col-md-6 col-lg-3"><div class="result-card" id="mc-lr"><div class="card-body p-4"><div class="model-icon-container"><img src="/static/images/logisticregression.png" alt="LR" class="model-icon" onerror="this.style.display='none'"></div><h3 class="h5 text-center mb-1">Logistic Reg.</h3><div class="model-acc text-center" id="ma-lr">—</div><div id="lr-metrics"></div><div class="verdict-chip idle mt-2" id="vc-lr">Awaiting patient…</div></div></div></div>
+      <div class="col-md-6 col-lg-3"><div class="result-card" id="mc-dt"><div class="card-body p-4"><div class="model-icon-container"><img src="/static/images/decision tree.png" alt="DTree" class="model-icon" onerror="this.style.display='none'"></div><h3 class="h5 text-center mb-1">Decision Tree</h3><div class="model-acc text-center" id="ma-dt">—</div><div id="dt-metrics"></div><div class="verdict-chip idle mt-2" id="vc-dt">Awaiting patient…</div></div></div></div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-8"><div class="chart-card"><div class="chart-label">Model Comparison</div><div style="height:240px;position:relative"><canvas id="modelBarChart"></canvas></div></div></div>
+      <div class="col-md-4"><div class="chart-card"><div class="chart-label">Feature Radar</div><div style="height:240px;position:relative"><canvas id="radarChart"></canvas></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ROC CURVE -->
+<section id="sec-roc" class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">ROC Curves</h2>
+    <p class="section-sub text-center mb-4">Receiver Operating Characteristic — higher AUC = better discrimination between classes</p>
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="chart-card">
+          <div style="height:320px;position:relative"><canvas id="rocChart"></canvas></div>
+          <div class="lc-legend mt-3 flex-wrap" id="rocLegend"></div>
+          <div class="text-muted mt-2" style="font-size:.72rem">
+            The diagonal dashed line is a random classifier (AUC = 0.5). A perfect model hugs the top-left corner.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONFUSION MATRIX -->
+<section id="sec-cm" class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Confusion Matrix</h2>
+    <p class="section-sub text-center mb-4">Classification report on test set (154 samples)</p>
+    <div class="text-center mb-4">
+      <div class="btn-group" id="cmTabs">
+        <button class="btn btn-outline-primary active" onclick="showCM('svm',this)">SVM</button>
+        <button class="btn btn-outline-primary" onclick="showCM('lr',this)">LogReg</button>
+        <button class="btn btn-outline-primary" onclick="showCM('knn',this)">KNN</button>
+        <button class="btn btn-outline-primary" onclick="showCM('dt',this)">DTree</button>
+      </div>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4"><div class="chart-card"><div class="chart-label mb-3">Matrix</div><div class="cm-grid"><div class="cm-cell cm-tp"><span class="cm-val" id="cm-tp">—</span><span class="cm-lbl">True Pos</span></div><div class="cm-cell cm-fp"><span class="cm-val" id="cm-fp">—</span><span class="cm-lbl">False Pos</span></div><div class="cm-cell cm-fn"><span class="cm-val" id="cm-fn">—</span><span class="cm-lbl">False Neg</span></div><div class="cm-cell cm-tn"><span class="cm-val" id="cm-tn">—</span><span class="cm-lbl">True Neg</span></div></div></div></div>
+      <div class="col-md-7"><div class="chart-card"><div class="chart-label mb-3">Classification Report</div><table class="metrics-table w-100"><thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead><tbody id="cmTableBody"></tbody></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEARNING CURVE -->
+<section id="sec-lc" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Learning Curves</h2>
+    <p class="section-sub text-center mb-4">Training vs cross-validation score as training set grows</p>
+    <div class="text-center mb-4">
+      <div class="btn-group" id="lcTabs">
+        <button class="btn btn-outline-primary active" onclick="showLC('svm',this)">SVM</button>
+        <button class="btn btn-outline-primary" onclick="showLC('lr',this)">LogReg</button>
+        <button class="btn btn-outline-primary" onclick="showLC('knn',this)">KNN</button>
+        <button class="btn btn-outline-primary" onclick="showLC('dt',this)">DTree</button>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-10"><div class="chart-card"><div style="height:280px;position:relative"><canvas id="lcChart"></canvas></div><div class="lc-legend mt-2"><span><span class="lc-dot" style="background:#E1757D"></span>Training score</span><span><span class="lc-dot" style="background:#3b82f6"></span>CV validation</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="sec-features" class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Feature Importance</h2>
+    <p class="section-sub text-center mb-5">Risk factor rankings from Logistic Regression coefficients</p>
+    <div class="row justify-content-center">
+      <div class="col-md-10"><div class="chart-card"><table class="metrics-table w-100"><thead><tr><th>#</th><th>Feature</th><th>Importance</th><th>Bar</th><th>Diabetic Avg</th><th>Healthy Avg</th><th>Δ</th></tr></thead><tbody id="ftBody"></tbody></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCATTER -->
+<section id="sec-scatter" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Feature Scatter</h2>
+    <p class="section-sub text-center mb-4">Explore relationships between any two features</p>
+    <div class="text-center mb-4 d-flex justify-content-center align-items-center gap-3">
+      <select class="form-select form-select-sm" id="scatterX" onchange="updateScatter()" style="width:140px"><option value="5" selected>BMI</option><option value="1">Glucose</option><option value="7">Age</option><option value="0">Pregnancies</option><option value="4">Insulin</option><option value="6">Pedigree</option></select>
+      <span class="text-muted fw-bold">vs</span>
+      <select class="form-select form-select-sm" id="scatterY" onchange="updateScatter()" style="width:140px"><option value="1" selected>Glucose</option><option value="5">BMI</option><option value="7">Age</option><option value="0">Pregnancies</option><option value="4">Insulin</option><option value="6">Pedigree</option></select>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-10"><div class="chart-card"><div style="height:300px;position:relative"><canvas id="scatterChart"></canvas></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PREDICT -->
+<section id="sec-predict" class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-2">Patient Risk Predictor</h2>
+    <p class="section-sub text-center mb-5">Enter patient data — all 4 trained models vote on the outcome</p>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-user-md me-2" style="color:#E1757D"></i>Patient Metrics</h5>
+            <div class="row g-3">
+              <div class="col-6"><label class="form-label small fw-semibold">Pregnancies</label><input type="number" class="form-control" id="f_preg" value="3" min="0" max="17"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">Glucose (mg/dL)</label><input type="number" class="form-control" id="f_gluc" value="120" min="50" max="200"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">Blood Pressure</label><input type="number" class="form-control" id="f_bp" value="70" min="40" max="130"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">Skin Thickness</label><input type="number" class="form-control" id="f_skin" value="20" min="0" max="99"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">Insulin (μU/mL)</label><input type="number" class="form-control" id="f_ins" value="80" min="0" max="846"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">BMI</label><input type="number" class="form-control" id="f_bmi" value="32" step="0.1" min="15" max="67"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">Pedigree Function</label><input type="number" class="form-control" id="f_dpf" value="0.47" step="0.01" min="0.08" max="2.5"></div>
+              <div class="col-6"><label class="form-label small fw-semibold">Age</label><input type="number" class="form-control" id="f_age" value="33" min="21" max="81"></div>
+            </div>
+            <button class="btn btn-primary w-100 mt-4" id="predictBtn" onclick="runPrediction()" disabled>
+              <i class="fas fa-flask me-2"></i>Train models first
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-chart-pie me-2" style="color:#E1757D"></i>Prediction Result</h5>
+            <div id="resultEmpty" class="text-center text-muted py-5">
+              <i class="fas fa-info-circle fa-3x mb-3" style="opacity:.2"></i>
+              <p>Enter patient data and click Analyse Patient Risk</p>
+            </div>
+            <div id="resultContent" style="display:none">
+              <div id="outcomeBadge" class="mb-3"></div>
+              <div class="text-center mb-3">
+                <svg width="180" height="100" viewBox="0 0 170 95">
+                  <path d="M 10 88 A 75 75 0 0 1 160 88" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="11" stroke-linecap="round"/>
+                  <path id="gaugePath" d="M 10 88 A 75 75 0 0 1 160 88" fill="none" stroke="#E1757D" stroke-width="11" stroke-linecap="round" stroke-dasharray="235.6" stroke-dashoffset="235.6" style="transition:stroke-dashoffset 1.2s ease,stroke .4s"/>
+                  <circle id="gaugeNeedle" cx="10" cy="88" r="7" fill="#E1757D" stroke="white" stroke-width="2.5" style="transition:cx 1.2s ease,cy 1.2s ease"/>
+                </svg>
+                <div class="gauge-pct" id="gaugePct">—</div>
+                <div class="text-muted small">Ensemble Probability</div>
+              </div>
+              <div class="row g-2 mb-3" id="voteCards"></div>
+              <div class="analysis-box"><div class="analysis-label"><i class="fas fa-stethoscope me-1"></i>Risk Summary</div><div id="analysisText" class="small text-muted mt-1"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HISTORY -->
+<section id="sec-history" class="py-5 bg-light">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div><h2 class="section-title mb-1">Prediction History</h2><p class="section-sub mb-0">All past patient analyses</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm" onclick="exportCSV()"><i class="fas fa-download me-1"></i>Export CSV</button>
+        <button class="btn btn-outline-danger btn-sm" onclick="clearHistory()"><i class="fas fa-trash me-1"></i>Clear</button>
+      </div>
+    </div>
+    <div id="historyList"><p class="text-muted text-center py-4" id="historyEmpty">No analyses yet.</p></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-4 bg-dark text-white">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6 text-center text-md-start"><p class="mb-0">&copy; 2025 DIA PREDICT &nbsp;·&nbsp; Parisa Roozgarian</p></div>
+      <div class="col-md-6 text-center text-md-end"><p class="mb-0">Flask &nbsp;·&nbsp; scikit-learn &nbsp;·&nbsp; Python</p></div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
