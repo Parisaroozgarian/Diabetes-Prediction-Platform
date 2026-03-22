@@ -17,7 +17,14 @@ import json
 os.environ["LOKY_MAX_CPU_COUNT"] = "1"
 os.environ["JOBLIB_MULTIPROCESSING"] = "0"
 
-app = Flask(__name__)
+# ── FIX 1: Point Flask to the correct templates/ and static/ folders ──────────
+# Works both locally (from api/) and on Vercel serverless
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
 
 # ─── In-memory model cache ────────────────────────────────────────────────────
 _cache = {}   # { 'models': {}, 'scaler': ..., 'results': {}, 'dataset': {} }
@@ -25,10 +32,10 @@ _cache = {}   # { 'models': {}, 'scaler': ..., 'results': {}, 'dataset': {} }
 
 # ─── Data Loading ─────────────────────────────────────────────────────────────
 def load_data():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(current_dir, 'static', 'diabetes.csv')
+    # ── FIX 2: Correct CSV path — works from api/index.py location ──────────
+    data_path = os.path.join(BASE_DIR, 'static', 'diabetes.csv')
     if not os.path.exists(data_path):
-        raise FileNotFoundError("diabetes.csv not found in static/")
+        raise FileNotFoundError(f"diabetes.csv not found at: {data_path}")
 
     df = pd.read_csv(data_path)
 
@@ -177,9 +184,9 @@ def train_all_models(test_size=0.2, hyperparams=None, selected_features=None):
     }
 
     # Store in cache
-    _cache['models']  = trained_models
-    _cache['scaler']  = scaler
-    _cache['results'] = results
+    _cache['models']   = trained_models
+    _cache['scaler']   = scaler
+    _cache['results']  = results
     _cache['features'] = features
     _cache['dataset']  = dataset
 
@@ -197,9 +204,9 @@ def index():
 def api_train():
     """Train all 4 models and return full metrics."""
     try:
-        body             = request.get_json(silent=True) or {}
-        test_size        = float(body.get('test_size', 0.2))
-        hyperparams      = body.get('hyperparams', {})
+        body              = request.get_json(silent=True) or {}
+        test_size         = float(body.get('test_size', 0.2))
+        hyperparams       = body.get('hyperparams', {})
         selected_features = body.get('features', None)
         results, features, dataset = train_all_models(test_size, hyperparams, selected_features)
         return jsonify({'results': results, 'features': features, 'dataset': dataset})
@@ -211,8 +218,12 @@ def api_train():
 def api_predict():
     """Run inference on all trained models for a single patient."""
     try:
+        # ── FIX 3: Auto-train with defaults on Vercel cold start ─────────────
+        # Vercel serverless = stateless. _cache is empty on every cold start.
+        # Auto-training takes ~5-10s on first predict after cold start, then
+        # responds normally. This is the correct approach for serverless.
         if 'models' not in _cache:
-            return jsonify({'error': 'Models not trained yet. Call /api/train first.'}), 400
+            train_all_models()
 
         data = request.get_json()
         vals = [float(data[k]) for k in
@@ -246,10 +257,7 @@ def api_results():
     })
 
 
-# ─── Vercel handler ───────────────────────────────────────────────────────────
-def handler(event, context):
-    return app(event, context)
-
-
+# ── FIX 4: Vercel just needs the `app` object — no custom handler ─────────────
+# Local development only:
 if __name__ == '__main__':
     app.run(debug=True)
