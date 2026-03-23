@@ -154,11 +154,18 @@ body {
 .cm-fn { background:rgba(225,117,125,.12); color:var(--primary-dark); }
 
 /* ── TABLES ─────────────────────────────────────────────── */
-.metrics-table { border-collapse:collapse; font-size:.82rem; }
+.metrics-table { border-collapse:collapse; font-size:.82rem; width: 100%; }
 .metrics-table th { font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:var(--secondary-color); font-weight:600; padding:.5rem .75rem; border-bottom:2px solid #e2e8f0; }
 .metrics-table td { padding:.55rem .75rem; border-bottom:1px solid #f1f5f9; color:var(--text-dark); }
 .metrics-table tr:last-child td { border-bottom:none; }
 .metrics-table tr:hover td { background:#f8fafc; }
+
+/* ── TABLE SCROLL WRAPPER — fixes mobile clipping ───────── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--border-radius);
+}
 
 /* feature imp bar */
 .imp-track { background:rgba(0,0,0,.06); border-radius:99px; height:5px; overflow:hidden; width:110px; }
@@ -207,13 +214,104 @@ body {
 .fade-in { animation:fadeIn .4s ease-out forwards; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-/* ── RESPONSIVE ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE FIXES
+   ══════════════════════════════════════════════════════════ */
+
 @media (max-width:991px) {
   .hero h1 { font-size:2.25rem; }
   .hero .container { padding-top:80px; }
   .navbar { height:auto; min-height:60px; }
 }
+
 @media (max-width:768px) {
+  /* Hero */
   .hero h1 { font-size:2rem; }
   .hero .lead { font-size:1rem; }
+
+  /* Section headings */
+  .section-title { font-size:1.4rem; }
+
+  /* Stat cards — 2 per row on mobile */
+  .stat-val { font-size:1.3rem; }
+  .stat-lbl { font-size:.6rem; }
+
+  /* Chart cards — reduce padding */
+  .chart-card { padding:.9rem; }
+
+  /* ── TABLE FIX — the main issue you saw ─────────────────
+     Wrap tables in a scrollable container so they don't
+     get clipped on narrow screens                          */
+  .chart-card .metrics-table,
+  #sec-features .metrics-table,
+  #sec-cm .metrics-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  /* Tighten table cell padding on mobile */
+  .metrics-table th,
+  .metrics-table td {
+    padding: .4rem .5rem;
+    font-size: .72rem;
+  }
+
+  /* Feature importance bar — shorter on mobile */
+  .imp-track { width: 70px; }
+
+  /* Confusion matrix — center and shrink slightly */
+  .cm-grid { margin: 0 auto; }
+  .cm-cell { width:75px; height:65px; }
+  .cm-val  { font-size:1.3rem; }
+
+  /* Model cards — tighten up */
+  .model-acc { font-size:1.6rem; }
+  .metric-label,
+  .metric-value { font-size:.78rem; }
+
+  /* Prediction vote cards — stack on very small screens */
+  .vote-card { padding:.5rem .7rem; }
+  .vote-prob  { font-size:.95rem; }
+
+  /* History items — allow text to wrap */
+  .history-item { flex-direction:column; align-items:flex-start; gap:.4rem; }
+
+  /* Learning curve legend — wrap */
+  .lc-legend { flex-wrap:wrap; gap:.6rem; }
+
+  /* Gauge SVG — center properly */
+  #resultContent svg { display:block; margin:0 auto; }
+
+  /* Btn group tabs — wrap on small screens */
+  #cmTabs, #lcTabs { display:flex; flex-wrap:wrap; gap:4px; }
+  #cmTabs .btn, #lcTabs .btn { font-size:.75rem; padding:.4rem .8rem; flex:1; min-width:70px; }
+
+  /* Scatter dropdowns */
+  #scatterX, #scatterY { width:110px !important; font-size:.8rem; }
+
+  /* Feature toggles in train section */
+  #featureToggles { font-size:.72rem; }
+}
+
+@media (max-width:480px) {
+  /* Extra small phones */
+  .hero h1 { font-size:1.6rem; }
+  .hero .btn-light { padding:.75rem 1.5rem; font-size:.9rem; }
+
+  .section-title { font-size:1.2rem; }
+
+  /* Full-width train button */
+  #trainBtn { width:100%; }
+
+  /* Make model cards full width */
+  .result-card .card-body { padding:1rem; }
+  .model-icon { width:45px; height:45px; }
+
+  /* Stack CM layout vertically */
+  #sec-cm .row { flex-direction:column; }
+
+  /* Tighter chart heights */
+  #glucoseChart, #bmiChart { height:140px !important; }
 }
